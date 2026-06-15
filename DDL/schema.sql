@@ -462,6 +462,29 @@ BEGIN
 END;
 GO
 
+CREATE PROCEDURE NotReturnedInventories
+	@StoreID INT
+AS
+BEGIN
+	SELECT
+		i.InventoryID,
+		p.CustomerID,
+		p.PaymentDate AS RentalDate,
+		CASE
+			WHEN GETDATE() > DATEADD(day, i.RentalDuration, p.PaymentDate) THEN 'Late'
+			ELSE 'Not Late'
+		END AS [Status]
+	FROM Store AS s
+	JOIN Inventory AS i
+		ON s.StoreID = i.StoreID
+	JOIN Rental AS r
+		ON i.InventoryID = r.InventoryID
+	JOIN Payment AS p
+		ON r.PaymentID = p.PaymentID
+	WHERE s.StoreID = @StoreID AND r.ReturnDate IS NULL
+END;
+GO
+
 --- CREATE TRIGGER ---
 CREATE TRIGGER SetCredentials
 ON Staff
