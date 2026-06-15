@@ -193,6 +193,8 @@ CREATE TABLE Payment (
         ON UPDATE CASCADE
 );
 GO
+ALTER TABLE Payment ADD CONSTRAINT [DF_PaymentDate] DEFAULT (GETDATE()) FOR PaymentDate;
+GO
 
 CREATE TABLE Rental (
     RentalID INT IDENTITY,
@@ -482,6 +484,43 @@ BEGIN
 	JOIN Payment AS p
 		ON r.PaymentID = p.PaymentID
 	WHERE s.StoreID = @StoreID AND r.ReturnDate IS NULL
+END;
+GO
+
+CREATE PROCEDURE ProcessNewRental
+	@CustomerID INT,
+	@InventoryID INT,
+	@Amount DECIMAL(5,2)
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		BEGIN TRANSACTION
+
+		DECLARE @PaymentID INT;
+
+		INSERT INTO Payment (Amount, CustomerID)
+		VALUES (@Amount, @CustomerID);
+
+		SET @PaymentID = SCOPE_IDENTITY();
+
+		INSERT INTO Rental (InventoryID, PaymentID)
+		VALUES (@InventoryID, @PaymentID);
+
+		COMMIT TRANSACTION
+
+		PRINT 'Rental and Payment successfully processed.';
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			PRINT 'Transaction rolled back due to an error!';
+		END;
+
+		THROW;
+	END CATCH;
 END;
 GO
 
