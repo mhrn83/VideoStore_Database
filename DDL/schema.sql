@@ -302,36 +302,6 @@ AS
     GROUP BY a.ActorID, a.FirstName, a.LastName;
 GO
 
-CREATE VIEW SalesByFilmGenre
-AS
-    SELECT
-        g.[Name] AS Genre,
-        SUM(i.RentalRate) AS TotalSales
-    FROM Rental AS r
-    JOIN Inventory AS i
-        ON r.InventoryID = i.InventoryID
-    JOIN Film AS f
-        ON i.FilmID = f.FilmID
-    JOIN FilmGenre AS fg
-        ON f.FilmID = fg.FilmID
-    JOIN Genre AS g
-        ON fg.GenreID = g.GenreID
-    GROUP BY g.[Name];
-GO
-
-CREATE VIEW SalesByStore
-AS
-    SELECT
-        s.[Name] AS Store,
-        SUM(i.RentalRate) AS TotalSales
-    FROM Store AS s
-    LEFT JOIN Inventory AS i
-        ON s.StoreID = i.StoreID
-    LEFT JOIN Rental AS r
-        ON i.InventoryID = r.InventoryID
-    GROUP BY s.StoreID, s.[Name];
-GO
-
 --- CREATE FUNCTION ---
 CREATE FUNCTION HashPassword(@PlainPassword VARCHAR(40), @Salt UNIQUEIDENTIFIER)
 RETURNS VARBINARY(32)

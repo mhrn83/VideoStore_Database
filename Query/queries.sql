@@ -47,3 +47,43 @@ JOIN Film AS f
 	ON i.FilmID = f.FilmID
 GROUP BY f.FilmID, f.Title;
 
+--- Total rental sales for each movie Genre per store ---
+SELECT *
+FROM (
+	SELECT
+		g.[Name] AS Genre,
+		i.StoreID,
+		i.RentalRate,
+		SUM(i.RentalRate) OVER (PARTITION BY i.StoreID) AS StoreTotalSales
+	FROM Rental AS r
+	JOIN Inventory AS i
+		ON r.InventoryID = i.InventoryID
+	JOIN Film AS f
+		ON i.FilmID = f.FilmID
+	JOIN FilmGenre AS fg
+		ON f.FilmID = fg.FilmID
+	JOIN Genre AS g
+		ON fg.GenreID = g.GenreID
+) AS SourceTable
+PIVOT (
+	SUM(RentalRate)
+	FOR Genre IN (
+		[Action],
+		[Animation], 
+		[Children],
+		[Classics],
+		[Comedy],
+		[Documentary],
+		[Drama],
+		[Family],
+		[Foreign],
+		[Games],
+		[Horror],
+		[Music],
+		[New],
+		[Sci-Fi],
+		[Sports],
+		[Travel]
+	)
+) AS PivotTable
+ORDER BY StoreTotalSales DESC;
