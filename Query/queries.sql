@@ -107,3 +107,35 @@ JOIN City AS ci
 JOIN Country AS co
 	ON ci.CountryID = co.CountryID
 GROUP BY ROLLUP (co.[Name], ci.[Name]);
+
+--- Number of movies per rating in each store ---
+SELECT *
+FROM (
+	SELECT s.StoreID, i.InventoryID, f.Rating
+	FROM Store AS s
+	JOIN Inventory AS i
+		ON s.StoreID = i.StoreID
+	JOIN Film AS f
+		ON i.FilmID = f.FilmID
+) AS SourceTable
+PIVOT (
+	COUNT(InventoryID)
+	FOR Rating IN ([G],[PG],[PG-13],[R],[NC-17])
+) AS PivotTable;
+
+--- Customer payment windowing history ---
+SELECT
+	CustomerID,
+	PaymentDate,
+	Amount,
+	SUM(Amount) OVER (
+		PARTITION BY CustomerID
+		ORDER BY PaymentDate ASC
+		ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+	) AS RunningTotal,
+	AVG(Amount) OVER (
+		PARTITION BY CustomerID
+		ORDER BY PaymentDate ASC
+		ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+	) AS ThreePaymentMovingAverage
+FROM Payment;
