@@ -87,3 +87,23 @@ PIVOT (
 	)
 ) AS PivotTable
 ORDER BY StoreTotalSales DESC;
+
+--- Customer settlment stat ---
+SELECT
+	CASE
+		WHEN GROUPING(co.[Name]) = 1 THEN '*'
+		ELSE co.[Name]
+	END AS Country,
+	CASE
+		WHEN GROUPING(ci.[Name]) = 1 THEN '*'
+		ELSE ci.[Name]
+	END AS City,
+	COUNT(c.CustomerID) AS CustomerCount
+FROM Customer AS c
+JOIN [Address] AS a
+	ON c.AddressID = a.AddressID
+JOIN City AS ci
+	ON a.CityID = ci.CityID
+JOIN Country AS co
+	ON ci.CountryID = co.CountryID
+GROUP BY ROLLUP (co.[Name], ci.[Name]);
