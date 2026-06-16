@@ -524,3 +524,21 @@ BEGIN
     ) s
 END;
 GO
+
+--- CREATE LOGIN ---
+CREATE LOGIN StaffManagerLogin WITH PASSWORD = 'M4n@ager';
+GO
+GRANT CONNECT TO StaffManagerLogin;
+GO
+
+--- CREATE USER ---
+CREATE USER StoreManagerUser FOR LOGIN StaffManagerLogin;
+GO
+
+--- CREATE ROLE ---
+CREATE ROLE StoreManager;
+GO
+GRANT SELECT ON StaffList TO StoreManager;
+GO
+ALTER ROLE StoreManager ADD MEMBER StoreManagerUser;
+GO
