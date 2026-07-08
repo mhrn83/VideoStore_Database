@@ -9180,7 +9180,7 @@ VALUES
 	(183,520),
 	(183,576),
 	(183,636);
-INSERT INTO Cast (ActorID, FilmID)
+INSERT INTO [Cast] (ActorID, FilmID)
 VALUES 
 	(183,715),
 	(183,850),
